@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -18,14 +17,14 @@ func collectGitRepositories(gitRoots []string) (gits []string) {
 		if strings.TrimSpace(root) == "" {
 			continue
 		}
-		listing, err := ioutil.ReadDir(root)
+		listing, err := os.ReadDir(root)
 		if err != nil {
 			log.Println("Couldn't resolve path (skipping):", err)
 			continue
 		}
 		for _, item := range listing {
 			path := filepath.Join(root, item.Name())
-			if isGitRepository(path, item) {
+			if isGitRepository(path, item.IsDir()) {
 				gits = append(gits, path)
 			}
 		}
@@ -39,14 +38,14 @@ func filterGitRepositories(paths []string) (gits []string) {
 		if err == os.ErrNotExist {
 			continue
 		}
-		if isGitRepository(path, stat) {
+		if isGitRepository(path, stat.IsDir()) {
 			gits = append(gits, path)
 		}
 	}
 	return gits
 }
-func isGitRepository(path string, item os.FileInfo) bool {
-	if !item.IsDir() {
+func isGitRepository(path string, isDir bool) bool {
+	if !isDir {
 		return false
 	}
 

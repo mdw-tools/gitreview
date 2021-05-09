@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strings"
@@ -14,7 +13,6 @@ type Config struct {
 	GitRepositoryPaths []string
 	GitRepositoryRoots []string
 	GitGUILauncher     string
-	OutputFilePath     string
 }
 
 func ReadConfig() *Config {
@@ -33,14 +31,6 @@ func ReadConfig() *Config {
 	flag.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
 			"The external git GUI application to use for visual reviews."+"\n"+
-			"-->",
-	)
-
-	flag.StringVar(&config.OutputFilePath,
-		"outfile", "SMARTY_REVIEW_LOG", ""+
-			"The path or name of the environment variable containing the"+"\n"+
-			"path to your pre-existing code review file. If the file exists"+"\n"+
-			"the final log entry will be appended to that file instead of stdout."+"\n"+
 			"-->",
 	)
 
@@ -74,35 +64,6 @@ func ReadConfig() *Config {
 	return config
 }
 
-func (this *Config) OpenOutputWriter() io.WriteCloser {
-	this.OutputFilePath = strings.TrimSpace(this.OutputFilePath)
-	if this.OutputFilePath == "" {
-		log.Println("Final report will be written to stdout.")
-		return os.Stdout
-	}
-
-	path, found := os.LookupEnv(this.OutputFilePath)
-	if found {
-		log.Printf("Found output path in environment variable: %s=%s", this.OutputFilePath, path)
-	} else {
-		path = this.OutputFilePath
-	}
-
-	stat, err := os.Stat(path)
-	if err == nil && err != os.ErrNotExist {
-		file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, stat.Mode())
-		if err == nil {
-			log.Println("Final report will be appended to", path)
-			return file
-		} else {
-			log.Printf("Could not open file for appending: [%s] Error: %v", this.OutputFilePath, err)
-		}
-	}
-
-	log.Println("Final report will be written to stdout.")
-	return os.Stdout
-}
-
 const rawDoc = `# gitreview
 
 gitreview facilitates visual inspection (code review) of git
@@ -117,20 +78,16 @@ repositories that meet any of the following criteria:
 We use variants of the following commands to ascertain the
 status of each repository:
 
-- 'git remote'           (shows remote address)
-- 'git status'           (shows uncommitted files)
-- 'git fetch'            (finds new commits/tags/branches)
-- 'git rev-list'         (lists commits behind/ahead-of <default-branch>)
-- 'git config --get ...' (show config parameters of a repo)
+- |git remote|           (shows remote address)
+- |git status|           (shows uncommitted files)
+- |git fetch|            (finds new commits/tags/branches)
+- |git rev-list|         (lists commits behind/ahead-of <default-branch>)
+- |git config --get ...| (show config parameters of a repo)
 
-...all of which should be safe enough. 
+...all of which should be safe enough.
 
 Each repository that meets any criteria above will be
-presented for review. After all reviews are complete a
-concatenated report of all output from 'git fetch' for
-repositories that were behind their origin is printed to
-stdout. Only repositories with "smartystreets" in their
-path are included in this report.
+presented for review.
 
 Repositories are identified for consideration from path values
 supplied as non-flag command line arguments or via the roots
@@ -138,7 +95,7 @@ flag (see details below).
 
 Installation:
 
-    go get -u github.com/smartystreets/gitreview
+    go get -u github.com/mdwhatcott/gitreview
 
 
 Skipping Repositories:
@@ -153,7 +110,7 @@ repository. The following command will produce this result:
 Omitting Repositories:
 
 If you have repositories in your list that you would still like to audit
-but aren't responsible to sign off (it's code from another team), you can 
+but aren't responsible to sign off (it's code from another team), you can
 mark them to be omitted from the final report by adding a config variable
 to the repository. The following command will produce this result:
 
@@ -162,8 +119,8 @@ to the repository. The following command will produce this result:
 
 Specifying the 'default' branch:
 
-This tool assumes that the default branch of all repositories is 'master'.
-If a repository uses a non-standard default branch (ie. 'main', 'trunk')
+This tool assumes that the default branch of all repositories is 'main'.
+If a repository uses a non-standard default branch (ie. 'master', 'trunk')
 and you want this tool to focus  reviews on commits pushed to that branch
 instead, run the following command:
 
@@ -173,4 +130,4 @@ instead, run the following command:
 CLI Flags:
 `
 
-var doc = strings.ReplaceAll(rawDoc, "'", "`")
+var doc = strings.ReplaceAll(rawDoc, "|", "`")

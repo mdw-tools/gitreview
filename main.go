@@ -5,5 +5,4 @@ func main() {
 	reviewer := NewGitReviewer(config)
 	reviewer.GitAnalyzeAll()
 	reviewer.ReviewAll()
-	reviewer.PrintCodeReviewLogEntry()
 }

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os/exec"
-	"strings"
 	"time"
 )
 
@@ -17,7 +16,6 @@ type GitReviewer struct {
 	ahead   map[string]string
 	behind  map[string]string
 	fetched map[string]string
-	journal map[string]string
 	omitted map[string]string
 	skipped map[string]string
 }
@@ -34,7 +32,6 @@ func NewGitReviewer(config *Config) *GitReviewer {
 		ahead:   make(map[string]string),
 		behind:  make(map[string]string),
 		fetched: make(map[string]string),
-		journal: make(map[string]string),
 		omitted: make(map[string]string),
 		skipped: make(map[string]string),
 	}
@@ -57,7 +54,6 @@ func (this *GitReviewer) GitAnalyzeAll() {
 			this.erred[report.RepoPath] += report.RevListError
 			log.Println(report.RepoPath, report.RevListError)
 		}
-
 		if len(report.StatusOutput) > 0 {
 			this.messy[report.RepoPath] += report.StatusOutput
 		}
@@ -73,28 +69,14 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		if len(report.OmitOutput) > 0 {
 			this.omitted[report.RepoPath] += report.OmitOutput
 		}
-
 		if this.config.GitFetch && len(report.FetchOutput) > 0 {
 			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
-
-			if this.canJournal(report) {
-				this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
-			}
 		}
 	}
 }
-func (this *GitReviewer) canJournal(report *GitReport) bool {
-	if !strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
-		return false
-	}
-	if _, found := this.omitted[report.RepoPath]; found {
-		return false
-	}
-	return true
-}
 
 func (this *GitReviewer) ReviewAll() {
-	reviewable := sortUniqueKeys(this.erred, this.messy, this.ahead, this.behind, this.fetched, this.journal)
+	reviewable := sortUniqueKeys(this.erred, this.messy, this.ahead, this.behind, this.fetched)
 	if len(reviewable) == 0 {
 		log.Println("Nothing to review at this time.")
 		return
@@ -105,7 +87,6 @@ func (this *GitReviewer) ReviewAll() {
 	printMapKeys(this.ahead, "Repositories ahead of their origin: %d")
 	printMapKeys(this.behind, "Repositories behind their origin: %d")
 	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
-	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 	printMapKeys(this.skipped, "Repositories that were skipped: %d")
 	printStrings(reviewable, "Repositories to be reviewed: %d")
 
@@ -118,25 +99,6 @@ func (this *GitReviewer) ReviewAll() {
 			log.Println("Failed to open git GUI:", err)
 		}
 		time.Sleep(time.Millisecond * 250)
-	}
-}
-
-func (this *GitReviewer) PrintCodeReviewLogEntry() {
-	if len(this.journal) == 0 {
-		return
-	}
-
-	prompt("Press <ENTER> to conclude review process and print code review log entry...")
-
-	writer := this.config.OpenOutputWriter()
-	defer func() { _ = writer.Close() }()
-
-	fmt.Fprintln(writer)
-	fmt.Fprintln(writer)
-	fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
-	fmt.Fprintln(writer)
-	for _, review := range this.journal {
-		fmt.Fprintln(writer, review)
 	}
 }
 
