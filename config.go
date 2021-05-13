@@ -21,11 +21,11 @@ func ReadConfig() *Config {
 	config := new(Config)
 
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, doc)
-		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, "```")
+		_, _ = fmt.Fprintln(os.Stderr, doc)
+		_, _ = fmt.Fprintln(os.Stderr)
+		_, _ = fmt.Fprintln(os.Stderr, "```")
 		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "```")
+		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
 
 	flag.StringVar(&config.GitGUILauncher,
@@ -42,7 +42,7 @@ func ReadConfig() *Config {
 	)
 
 	gitRoots := flag.String(
-		"roots", "CDPATH", ""+
+		"roots", "GITREVIEWPATH", ""+
 			"The name of the environment variable containing colon-separated"+"\n"+
 			"path values to scan for any git repositories contained therein."+"\n"+
 			"Scanning is NOT recursive."+"\n"+
