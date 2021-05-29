@@ -6,16 +6,15 @@ import (
 )
 
 var (
-	gitRemoteCommand         = "git remote -v"                            // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
-	gitStatusCommand         = "git status --porcelain -uall"             // parse-able output, including untracked
-	gitFetchCommand          = "git fetch"                                // --dry-run"  // for debugging
-	gitFetchPendingReview    = ".."                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
-	gitRevListCommand        = "git rev-list --left-right %s...origin/%s" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
-	gitErrorTemplate         = "[ERROR] Could not execute [%s]: %v" + "\n"
-	gitOmitCommand           = "git config --get review.omit"
-	gitSkipCommand           = "git config --get review.skip"
-	gitDefaultBranchCommand  = "git config --get review.branch"
-	gitStandardDefaultBranch = "master"
+	gitRemoteCommand        = "git remote -v"                            // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
+	gitStatusCommand        = "git status --porcelain -uall"             // parse-able output, including untracked
+	gitFetchCommand         = "git fetch"                                // --dry-run"  // for debugging
+	gitFetchPendingReview   = ".."                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitRevListCommand       = "git rev-list --left-right %s...origin/%s" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
+	gitErrorTemplate        = "[ERROR] Could not execute [%s]: %v" + "\n"
+	gitOmitCommand          = "git config --get review.omit"
+	gitSkipCommand          = "git config --get review.skip"
+	gitDefaultBranchCommand = "git config --get review.branch"
 )
 
 func GitRevListCommand(branch string) string {
@@ -75,13 +74,9 @@ func (this *GitReport) GitOmitStatus() bool {
 	this.OmitOutput = out
 	return strings.Contains(out, "true")
 }
-func (this *GitReport) GitDefaultBranch() string {
+func (this *GitReport) GitRepoBranch() string {
 	out, _ := execute(this.RepoPath, gitDefaultBranchCommand)
-	branch := strings.TrimSpace(out)
-	if branch == "" {
-		return gitStandardDefaultBranch
-	}
-	return branch
+	return strings.TrimSpace(out)
 }
 func (this *GitReport) GitFetch() {
 	out, err := execute(this.RepoPath, gitFetchCommand)
@@ -92,8 +87,11 @@ func (this *GitReport) GitFetch() {
 		this.FetchOutput = out
 	}
 }
-func (this *GitReport) GitRevList() {
-	branch := this.GitDefaultBranch()
+func (this *GitReport) GitRevList(branch string) {
+	repoBranch := this.GitRepoBranch()
+	if len(repoBranch) > 0 {
+		branch = repoBranch
+	}
 	command := GitRevListCommand(branch)
 	out, err := execute(this.RepoPath, command)
 	if err != nil {

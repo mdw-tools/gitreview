@@ -6,13 +6,19 @@ import (
 )
 
 type Worker struct {
-	id  int
-	in  chan string
-	out chan *GitReport
+	id     int
+	branch string
+	in     chan string
+	out    chan *GitReport
 }
 
-func NewWorker(id int, in chan string, out chan *GitReport) *Worker {
-	return &Worker{id: id, in: in, out: out}
+func NewWorker(id int, branch string, in chan string, out chan *GitReport) *Worker {
+	return &Worker{
+		id:     id,
+		branch: branch,
+		in:     in,
+		out:    out,
+	}
 }
 
 func (this *Worker) Start() {
@@ -30,7 +36,7 @@ func (this *Worker) git(path string) *GitReport {
 		report.GitRemote()
 		report.GitStatus()
 		report.GitFetch()
-		report.GitRevList()
+		report.GitRevList(this.branch)
 	}
 	log.Println(report.Progress())
 	return report

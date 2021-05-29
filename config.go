@@ -9,6 +9,7 @@ import (
 )
 
 type Config struct {
+	GitDefaultBranch   string
 	GitFetch           bool
 	GitRepositoryPaths []string
 	GitRepositoryRoots []string
@@ -27,6 +28,14 @@ func ReadConfig() *Config {
 		flag.PrintDefaults()
 		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
+
+	flag.StringVar(&config.GitDefaultBranch,
+		"default-branch", or(os.Getenv("GITREVIEWBRANCH"), "main"), ""+
+			"The default branch to use. Defaults to the value of the\n"+
+			"GITREVIEWBRANCH environment variable, if declared,\n"+
+			"otherwise 'main'.\n"+
+			"-->",
+	)
 
 	flag.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
@@ -62,6 +71,13 @@ func ReadConfig() *Config {
 		gitFetchCommand += " --dry-run"
 	}
 	return config
+}
+
+func or(a string, b string) string {
+	if len(a) > 0 {
+		return a
+	}
+	return b
 }
 
 const rawDoc = `# gitreview
