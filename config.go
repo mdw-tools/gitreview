@@ -84,10 +84,10 @@ const rawDoc = `# gitreview
 
 WARNING: This README file is built from the source code. To modify its contents:
 
-1. Edit the string values in config.go
-2. Run make docs for the changes to show up in this file
+1. Edit the string values in |config.go|
+2. Run |make docs| for the changes to show up in this file
 
-gitreview facilitates visual inspection (code review) of git
+|gitreview| facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
 1. New content was fetched
@@ -113,6 +113,7 @@ presented for review.
 Repositories are identified for consideration from path values
 supplied as non-flag command line arguments or via the roots
 flag (see details below).
+
 
 ## Prerequisites:
 
@@ -158,6 +159,7 @@ All that remains is for the user to review each opened repository in the git GUI
 It is the user's responsibility to review each new tag, branch, and commit as well
 as to run |git pull| as desired to fully synchronize the local repository with the
 remote.
+
 
 ## Pre-repository Settings
 
