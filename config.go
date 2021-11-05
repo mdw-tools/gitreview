@@ -114,10 +114,52 @@ Repositories are identified for consideration from path values
 supplied as non-flag command line arguments or via the roots
 flag (see details below).
 
-Installation:
+## Prerequisites:
 
-    go get -u github.com/mdwhatcott/gitreview
+1. [Git](https://git-scm.com/)
+	- The gitreview tool will invoke the aforementioned git commands.
+1. A Git GUI (recommended: [Sublime Merge](https://www.sublimemerge.com/) or [SourceTree](https://www.sourcetreeapp.com/))
+	- The gitreview tool invokes your git GUI according to the 'gui' flag (details below).
+	- The git GUI used must support invocation from the command line in the form "<git-gui-command> /path/to/repository"
+1. A go compiler (v1.16 or higher)
+   - download [installer](https://golang.org/dl/)
+   - or use brew: "brew install golang"
 
+
+## Compilation/Installation:
+
+    git clone git@github.com:mdwhatcott/gitreview
+    cd gitreview
+    make install
+
+The above 'make install' runs 'go install' which installs executables
+"in the directory named by the GOBIN environment variable, which defaults
+to $GOPATH/bin or $HOME/go/bin if the GOPATH environment variable is not set."
+
+See the Makefile for other helpful targets/operations.
+
+
+## Usage Description
+
+After installation, the 'gitreview' executable, when invoked, will commence
+running 'git fetch' for all repositories it finds based on what is provided
+to the -roots flag. It uses a fan-out strategy to fetch multiple repositories
+concurrently.
+
+As repositories are scanned a brief summary of the status of each is emitted.
+After scanning all repositories a report of which repositories require a review.
+The 'gitreview' program will then halt, waiting for the user to press <ENTER>.
+
+Upon receiving <ENTER>, 'gitreview' will invoke the git GUI program specified
+by the -gui flag for each of the repositories previously listed. At this point
+the 'gitreview' tool's execution is concluded.
+
+All that remains is for the user to review each opened repository in the git GUI.
+It is the user's responsibility to review each new tag, branch, and commit as well
+as to run 'git pull' as desired to fully synchronize the local repository with the
+remote.
+
+## Pre-repository Settings
 
 Skipping Repositories:
 
