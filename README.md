@@ -65,6 +65,11 @@ CLI Flags:
 
 
 ```
+  -default-branch string
+    	The default branch to use. Defaults to the value of the
+    	GITREVIEWBRANCH environment variable, if declared,
+    	otherwise 'main'.
+    	--> (default "main")
   -fetch
     	When false, suppress all git fetch operations via --dry-run.
     	Repositories with updates will still be included in the review.
