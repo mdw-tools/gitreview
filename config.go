@@ -82,6 +82,11 @@ func or(a string, b string) string {
 
 const rawDoc = `# gitreview
 
+WARNING: This README file is built from the source code. To modify its contents:
+
+1. Edit the string values in config.go
+2. Run make docs for the changes to show up in this file
+
 gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
