@@ -16,7 +16,6 @@ type GitReviewer struct {
 	ahead   map[string]string
 	behind  map[string]string
 	fetched map[string]string
-	omitted map[string]string
 	skipped map[string]string
 }
 
@@ -32,7 +31,6 @@ func NewGitReviewer(config *Config) *GitReviewer {
 		ahead:   make(map[string]string),
 		behind:  make(map[string]string),
 		fetched: make(map[string]string),
-		omitted: make(map[string]string),
 		skipped: make(map[string]string),
 	}
 }
@@ -45,7 +43,6 @@ func (this *GitReviewer) GitAnalyzeAll() {
 	log.Println("  [A] ahead")
 	log.Println("  [B] behind")
 	log.Println("  [F] fetched")
-	log.Println("  [O] omitted")
 	log.Println("  [S] skipped")
 	reports := NewAnalyzer(workerCount, this.config.GitDefaultBranch).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
@@ -72,9 +69,6 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		}
 		if len(report.SkipOutput) > 0 {
 			this.skipped[report.RepoPath] += report.SkipOutput
-		}
-		if len(report.OmitOutput) > 0 {
-			this.omitted[report.RepoPath] += report.OmitOutput
 		}
 		if this.config.GitFetch && len(report.FetchOutput) > 0 {
 			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput

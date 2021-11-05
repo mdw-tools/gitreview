@@ -12,7 +12,6 @@ var (
 	gitFetchPendingReview   = ".."                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
 	gitRevListCommand       = "git rev-list --left-right %s...origin/%s" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
 	gitErrorTemplate        = "[ERROR] Could not execute [%s]: %v" + "\n"
-	gitOmitCommand          = "git config --get review.omit"
 	gitSkipCommand          = "git config --get review.skip"
 	gitDefaultBranchCommand = "git config --get review.branch"
 )
@@ -33,7 +32,6 @@ type GitReport struct {
 	StatusOutput  string
 	FetchOutput   string
 	RevListOutput string
-	OmitOutput    string
 	SkipOutput    string
 
 	RevListAhead  string
@@ -67,11 +65,6 @@ func (this *GitReport) GitStatus() {
 func (this *GitReport) GitSkipStatus() bool {
 	out, _ := execute(this.RepoPath, gitSkipCommand)
 	this.SkipOutput = out
-	return strings.Contains(out, "true")
-}
-func (this *GitReport) GitOmitStatus() bool {
-	out, _ := execute(this.RepoPath, gitOmitCommand)
-	this.OmitOutput = out
 	return strings.Contains(out, "true")
 }
 func (this *GitReport) GitRepoBranch() string {
@@ -138,11 +131,6 @@ func (this *GitReport) Progress() string {
 	}
 	if len(this.FetchOutput) > 0 {
 		status += "F"
-	} else {
-		status += " "
-	}
-	if len(this.OmitOutput) > 0 {
-		status += "O"
 	} else {
 		status += " "
 	}
