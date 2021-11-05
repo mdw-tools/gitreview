@@ -182,7 +182,7 @@ to the repository. The following command will produce this result:
 
 Specifying the 'default' branch:
 
-This tool assumes that the default branch of all repositories is 'master'.
+This tool assumes that the default branch of all repositories is 'main'.
 If a repository uses a non-standard default branch (ie. 'master', 'trunk')
 and you want this tool to focus  reviews on commits pushed to that branch
 instead, run the following command:
