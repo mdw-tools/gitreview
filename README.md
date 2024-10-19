@@ -47,7 +47,7 @@ flag (see details below).
 
 ## Compilation/Installation:
 
-    git clone git@github.com:mdwhatcott/gitreview
+    git clone git@github.com:mdw-tools/gitreview
     cd gitreview
     make install
 

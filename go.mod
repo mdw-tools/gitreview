@@ -1,3 +1,3 @@
-module github.com/mdwhatcott/gitreview
+module github.com/mdw-tools/gitreview
 
 go 1.16
