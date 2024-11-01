@@ -1,3 +1,3 @@
 module github.com/mdw-tools/gitreview
 
-go 1.16
+go 1.23

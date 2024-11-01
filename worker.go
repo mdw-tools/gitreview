@@ -35,7 +35,7 @@ func (this *Worker) git(path string) *GitReport {
 		report.GitRemote()
 		report.GitStatus()
 		report.GitFetch()
-		report.GitRevList(this.branch)
+		report.GitRevList()
 	}
 	log.Println(report.Progress())
 	return report
