@@ -28,10 +28,7 @@ status of each repository:
 Each repository that meets any criteria above will be
 presented for review.
 
-Repositories are identified for consideration from path values
-supplied as non-flag command line arguments or via the roots
-flag (see details below).
-
+Repositories are gathered recursively from the current working directory.
 
 ## Prerequisites:
 
@@ -116,11 +113,4 @@ CLI Flags:
   -gui string
     	The external git GUI application to use for visual reviews.
     	--> (default "smerge")
-  -roots string
-    	The name of the environment variable containing colon-separated
-    	path values to scan for any git repositories contained therein.
-    	Scanning is NOT recursive.
-    	NOTE: this flag will be ignored in the case that non-flag command
-    	line arguments representing paths to git repositories are provided.
-    	--> (default "GITREVIEWPATH")
 ```

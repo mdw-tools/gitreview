@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"flag"
 	"fmt"
 	"log"
@@ -9,11 +10,10 @@ import (
 )
 
 type Config struct {
-	GitDefaultBranch   string
-	GitFetch           bool
-	GitRepositoryPaths []string
-	GitRepositoryRoots []string
-	GitGUILauncher     string
+	GitDefaultBranch  string
+	GitFetch          bool
+	GitRepositoryRoot string
+	GitGUILauncher    string
 }
 
 func ReadConfig() *Config {
@@ -30,7 +30,7 @@ func ReadConfig() *Config {
 	}
 
 	flag.StringVar(&config.GitDefaultBranch,
-		"default-branch", or(os.Getenv("GITREVIEWBRANCH"), "main"), ""+
+		"default-branch", cmp.Or(os.Getenv("GITREVIEWBRANCH"), "main"), ""+
 			"The default branch to use. Defaults to the value of the\n"+
 			"GITREVIEWBRANCH environment variable, if declared,\n"+
 			"otherwise 'main'.\n"+
@@ -50,34 +50,17 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
-	gitRoots := flag.String(
-		"roots", "GITREVIEWPATH", ""+
-			"The name of the environment variable containing colon-separated"+"\n"+
-			"path values to scan for any git repositories contained therein."+"\n"+
-			"Scanning is NOT recursive."+"\n"+
-			"NOTE: this flag will be ignored in the case that non-flag command"+"\n"+
-			"line arguments representing paths to git repositories are provided."+"\n"+
-			"-->",
-	)
-
 	flag.Parse()
-
-	config.GitRepositoryPaths = flag.Args()
-	if len(config.GitRepositoryPaths) == 0 {
-		config.GitRepositoryRoots = strings.Split(os.Getenv(*gitRoots), ":")
-	}
 	if !config.GitFetch {
 		log.Println("Running git fetch with --dry-run (updated repositories will not be reviewed).")
 		gitFetchCommand += " --dry-run"
 	}
-	return config
-}
-
-func or(a string, b string) string {
-	if len(a) > 0 {
-		return a
+	working, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
 	}
-	return b
+	config.GitRepositoryRoot = working
+	return config
 }
 
 const rawDoc = `# gitreview
@@ -110,10 +93,7 @@ status of each repository:
 Each repository that meets any criteria above will be
 presented for review.
 
-Repositories are identified for consideration from path values
-supplied as non-flag command line arguments or via the roots
-flag (see details below).
-
+Repositories are gathered recursively from the current working directory.
 
 ## Prerequisites:
 

@@ -21,17 +21,14 @@ type GitReviewer struct {
 
 func NewGitReviewer(config *Config) *GitReviewer {
 	return &GitReviewer{
-		config: config,
-		repoPaths: append(
-			collectGitRepositories(config.GitRepositoryRoots),
-			filterGitRepositories(config.GitRepositoryPaths)...,
-		),
-		erred:   make(map[string]string),
-		messy:   make(map[string]string),
-		ahead:   make(map[string]string),
-		behind:  make(map[string]string),
-		fetched: make(map[string]string),
-		skipped: make(map[string]string),
+		config:    config,
+		repoPaths: collectGitRepositories(config.GitRepositoryRoot),
+		erred:     make(map[string]string),
+		messy:     make(map[string]string),
+		ahead:     make(map[string]string),
+		behind:    make(map[string]string),
+		fetched:   make(map[string]string),
+		skipped:   make(map[string]string),
 	}
 }
 
