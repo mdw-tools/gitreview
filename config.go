@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -16,20 +17,22 @@ type Config struct {
 	GitGUILauncher    string
 }
 
-func ReadConfig() *Config {
+func ReadConfig(version string) *Config {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	config := new(Config)
 
-	flag.Usage = func() {
-		_, _ = fmt.Fprintln(os.Stderr, doc)
+	flags := flag.NewFlagSet(fmt.Sprintf("%s @ %s", filepath.Base(os.Args[0]), version), flag.ExitOnError)
+
+	flags.Usage = func() {
+		_, _ = fmt.Fprintln(os.Stderr, doc(version))
 		_, _ = fmt.Fprintln(os.Stderr)
 		_, _ = fmt.Fprintln(os.Stderr, "```")
-		flag.PrintDefaults()
+		flags.PrintDefaults()
 		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
 
-	flag.StringVar(&config.GitDefaultBranch,
+	flags.StringVar(&config.GitDefaultBranch,
 		"default-branch", cmp.Or(os.Getenv("GITREVIEWBRANCH"), "main"), ""+
 			"The default branch to use. Defaults to the value of the\n"+
 			"GITREVIEWBRANCH environment variable, if declared,\n"+
@@ -37,20 +40,24 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
-	flag.StringVar(&config.GitGUILauncher,
+	flags.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
 			"The external git GUI application to use for visual reviews."+"\n"+
 			"-->",
 	)
 
-	flag.BoolVar(&config.GitFetch,
+	flags.BoolVar(&config.GitFetch,
 		"fetch", true, ""+
 			"When false, suppress all git fetch operations via --dry-run."+"\n"+
 			"Repositories with updates will still be included in the review."+"\n"+
 			"-->",
 	)
 
-	flag.Parse()
+	err := flags.Parse(os.Args[1:])
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if !config.GitFetch {
 		log.Println("Running git fetch with --dry-run (updated repositories will not be reviewed).")
 		gitFetchCommand += " --dry-run"
@@ -63,7 +70,7 @@ func ReadConfig() *Config {
 	return config
 }
 
-const rawDoc = `# gitreview
+const rawDoc = `# gitreview @ %s
 
 WARNING: This README file is built from the source code. To modify its contents:
 
@@ -165,4 +172,6 @@ instead, run the following command:
 CLI Flags:
 `
 
-var doc = strings.ReplaceAll(rawDoc, "|", "`")
+func doc(version string) string {
+	return strings.ReplaceAll(fmt.Sprintf(rawDoc, version), "|", "`")
+}
