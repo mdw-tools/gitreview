@@ -62,12 +62,23 @@ func ReadConfig(version string) *Config {
 		log.Println("Running git fetch with --dry-run (updated repositories will not be reviewed).")
 		gitFetchCommand += " --dry-run"
 	}
-	working, err := os.Getwd()
+	config.GitRepositoryRoot = gitRepositoryRoot(flags.Arg(0))
+	return config
+}
+
+func gitRepositoryRoot(pathFlag string) string {
+	if pathFlag != "" {
+		absolute, err := filepath.Abs(pathFlag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return absolute
+	}
+	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	config.GitRepositoryRoot = working
-	return config
+	return filepath.Join(home, "src")
 }
 
 const rawDoc = `# gitreview @ %s
@@ -100,7 +111,7 @@ status of each repository:
 Each repository that meets any criteria above will be
 presented for review.
 
-Repositories are gathered recursively from the current working directory.
+Repositories are gathered recursively from the path described by the first non-flag command-line argument or $HOME/src.
 
 ## Prerequisites:
 
