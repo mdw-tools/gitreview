@@ -41,7 +41,7 @@ func (this *GitReviewer) GitAnalyzeAll() {
 	log.Println("  [B] behind")
 	log.Println("  [F] fetched")
 	log.Println("  [S] skipped")
-	reports := NewAnalyzer(workerCount, this.config.GitDefaultBranch).AnalyzeAll(this.repoPaths)
+	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
 		if len(report.StatusError) > 0 {
 			this.erred[report.RepoPath] += report.StatusError

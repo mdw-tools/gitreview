@@ -6,16 +6,14 @@ import (
 )
 
 type Analyzer struct {
-	workerCount   int
-	workerInput   chan string
-	defaultBranch string
+	workerCount int
+	workerInput chan string
 }
 
-func NewAnalyzer(workerCount int, branch string) *Analyzer {
+func NewAnalyzer(workerCount int) *Analyzer {
 	return &Analyzer{
-		workerCount:   workerCount,
-		workerInput:   make(chan string),
-		defaultBranch: branch,
+		workerCount: workerCount,
+		workerInput: make(chan string),
 	}
 }
 
@@ -42,7 +40,7 @@ func (this *Analyzer) startWorkers() (outputs []chan *GitReport) {
 	for x := 0; x < this.workerCount; x++ {
 		output := make(chan *GitReport)
 		outputs = append(outputs, output)
-		go NewWorker(x, this.defaultBranch, this.workerInput, output).Start()
+		go NewWorker(x, this.workerInput, output).Start()
 	}
 	return outputs
 }

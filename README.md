@@ -1,4 +1,4 @@
-# gitreview
+# gitreview @ dev
 
 WARNING: This README file is built from the source code. To modify its contents:
 
@@ -28,7 +28,10 @@ status of each repository:
 Each repository that meets any criteria above will be
 presented for review.
 
-Repositories are gathered recursively from the current working directory.
+Repositories are gathered recursively from the path described by the
+first non-flag command-line argument. If no such argument is provided,
+the $CODEPATH/src directory is used (when $CODEPATH is set), otherwise
+the current working directory.
 
 ## Prerequisites:
 
@@ -101,11 +104,6 @@ CLI Flags:
 
 
 ```
-  -default-branch string
-    	The default branch to use. Defaults to the value of the
-    	GITREVIEWBRANCH environment variable, if declared,
-    	otherwise 'main'.
-    	--> (default "main")
   -fetch
     	When false, suppress all git fetch operations via --dry-run.
     	Repositories with updates will still be included in the review.

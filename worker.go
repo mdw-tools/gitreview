@@ -6,18 +6,16 @@ import (
 )
 
 type Worker struct {
-	id     int
-	branch string
-	in     chan string
-	out    chan *GitReport
+	id  int
+	in  chan string
+	out chan *GitReport
 }
 
-func NewWorker(id int, branch string, in chan string, out chan *GitReport) *Worker {
+func NewWorker(id int, in chan string, out chan *GitReport) *Worker {
 	return &Worker{
-		id:     id,
-		branch: branch,
-		in:     in,
-		out:    out,
+		id:  id,
+		in:  in,
+		out: out,
 	}
 }
 

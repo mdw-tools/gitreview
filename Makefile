@@ -14,4 +14,4 @@ docs:
 install:
 	go install -ldflags="-X 'main.Version=$(VERSION)'" github.com/mdw-tools/gitreview/...
 
-.PHONE: test fmt docs install package
+.PHONY: test fmt docs install

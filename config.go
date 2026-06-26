@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cmp"
 	"flag"
 	"fmt"
 	"log"
@@ -11,7 +10,6 @@ import (
 )
 
 type Config struct {
-	GitDefaultBranch  string
 	GitFetch          bool
 	GitRepositoryRoot string
 	GitGUILauncher    string
@@ -31,14 +29,6 @@ func ReadConfig(version string) *Config {
 		flags.PrintDefaults()
 		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
-
-	flags.StringVar(&config.GitDefaultBranch,
-		"default-branch", cmp.Or(os.Getenv("GITREVIEWBRANCH"), "main"), ""+
-			"The default branch to use. Defaults to the value of the\n"+
-			"GITREVIEWBRANCH environment variable, if declared,\n"+
-			"otherwise 'main'.\n"+
-			"-->",
-	)
 
 	flags.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
@@ -74,11 +64,15 @@ func gitRepositoryRoot(pathFlag string) string {
 		}
 		return absolute
 	}
-	home, err := os.UserHomeDir()
+	codePath := os.Getenv("CODEPATH")
+	if codePath != "" {
+		return codePath
+	}
+	working, err := os.Getwd()
 	if err != nil {
 		log.Fatal(err)
 	}
-	return filepath.Join(home, "src")
+	return working
 }
 
 const rawDoc = `# gitreview @ %s
@@ -111,7 +105,10 @@ status of each repository:
 Each repository that meets any criteria above will be
 presented for review.
 
-Repositories are gathered recursively from the path described by the first non-flag command-line argument or $HOME/src.
+Repositories are gathered recursively from the path described by the
+first non-flag command-line argument. If no such argument is provided,
+the $CODEPATH directory is used (when $CODEPATH is set), otherwise the
+current working directory.
 
 ## Prerequisites:
 
