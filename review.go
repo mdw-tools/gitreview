@@ -3,13 +3,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
+	"strings"
 	"time"
 )
 
 type GitReviewer struct {
 	config    *Config
-	repoPaths []string
+	repoPaths chan string
 
 	erred   map[string]string
 	messy   map[string]string
@@ -20,9 +22,10 @@ type GitReviewer struct {
 }
 
 func NewGitReviewer(config *Config) *GitReviewer {
+	paths := strings.SplitSeq(config.GitRepositoryRoot, string(os.PathListSeparator))
 	return &GitReviewer{
 		config:    config,
-		repoPaths: collectGitRepositories(config.GitRepositoryRoot),
+		repoPaths: collectGitRepositories(paths),
 		erred:     make(map[string]string),
 		messy:     make(map[string]string),
 		ahead:     make(map[string]string),
@@ -41,7 +44,7 @@ func (this *GitReviewer) GitAnalyzeAll() {
 	log.Println("  [B] behind")
 	log.Println("  [F] fetched")
 	log.Println("  [S] skipped")
-	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
+	reports := NewAnalyzer(workerCount, this.repoPaths).AnalyzeAll()
 	for _, report := range reports {
 		if len(report.StatusError) > 0 {
 			this.erred[report.RepoPath] += report.StatusError

@@ -64,9 +64,9 @@ func gitRepositoryRoot(pathFlag string) string {
 		}
 		return absolute
 	}
-	codePath := os.Getenv("CODEPATH")
-	if codePath != "" {
-		return codePath
+	pathVar := os.Getenv("GITREVIEWPATH")
+	if pathVar != "" {
+		return pathVar
 	}
 	working, err := os.Getwd()
 	if err != nil {

@@ -10,15 +10,14 @@ type Analyzer struct {
 	workerInput chan string
 }
 
-func NewAnalyzer(workerCount int) *Analyzer {
+func NewAnalyzer(workerCount int, workerInput chan string) *Analyzer {
 	return &Analyzer{
 		workerCount: workerCount,
-		workerInput: make(chan string),
+		workerInput: workerInput,
 	}
 }
 
-func (this *Analyzer) AnalyzeAll(paths []string) (fetches []*GitReport) {
-	go this.loadInputs(paths)
+func (this *Analyzer) AnalyzeAll() (fetches []*GitReport) {
 	outputs := this.startWorkers()
 	for fetch := range merge(outputs...) {
 		fetches = append(fetches, fetch)
@@ -27,13 +26,6 @@ func (this *Analyzer) AnalyzeAll(paths []string) (fetches []*GitReport) {
 		return fetches[i].RepoPath < fetches[j].RepoPath
 	})
 	return fetches
-}
-
-func (this *Analyzer) loadInputs(paths []string) {
-	for _, path := range paths {
-		this.workerInput <- path
-	}
-	close(this.workerInput)
 }
 
 func (this *Analyzer) startWorkers() (outputs []chan *GitReport) {

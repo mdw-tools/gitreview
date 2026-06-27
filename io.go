@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"iter"
 	"log"
 	"os"
 	"os/exec"
@@ -9,24 +10,30 @@ import (
 	"strings"
 )
 
-func collectGitRepositories(root string) (gits []string) {
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
+func collectGitRepositories(roots iter.Seq[string]) (results chan string) {
+	results = make(chan string)
+	go func() {
+		defer close(results)
+		for root := range roots {
+			err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+				if info.IsDir() && info.Name() == ".git" {
+					return filepath.SkipDir
+				}
+				if isGitRepository(path, info.IsDir()) {
+					results <- path
+					return filepath.SkipDir
+				}
+				return nil
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
-		if info.IsDir() && info.Name() == ".git" {
-			return filepath.SkipDir
-		}
-		if isGitRepository(path, info.IsDir()) {
-			gits = append(gits, path)
-			return filepath.SkipDir
-		}
-		return nil
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	return gits
+	}()
+	return results
 }
 func isGitRepository(path string, isDir bool) bool {
 	if !isDir {
