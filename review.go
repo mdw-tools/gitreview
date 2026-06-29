@@ -36,7 +36,7 @@ func NewGitReviewer(config *Config) *GitReviewer {
 }
 
 func (this *GitReviewer) GitAnalyzeAll() {
-	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
+	log.Printf("Analyzing git repositories...")
 	log.Println("Legend:")
 	log.Println("  [!] error")
 	log.Println("  [M] messy")
