@@ -14,6 +14,18 @@ func collectGitRepositories(roots iter.Seq[string]) (results chan string) {
 	results = make(chan string)
 	go func() {
 		defer close(results)
+		seen := make(map[string]struct{})
+		emit := func(path string) {
+			resolved, err := filepath.EvalSymlinks(path)
+			if err != nil {
+				resolved = path
+			}
+			if _, ok := seen[resolved]; ok {
+				return
+			}
+			seen[resolved] = struct{}{}
+			results <- path
+		}
 		for root := range roots {
 			err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
@@ -22,8 +34,18 @@ func collectGitRepositories(roots iter.Seq[string]) (results chan string) {
 				if info.IsDir() && info.Name() == ".git" {
 					return filepath.SkipDir
 				}
+				if info.Mode()&os.ModeSymlink != 0 {
+					target, err := os.Stat(path) // follows symlinks
+					if err != nil {
+						return nil // broken symlink
+					}
+					if isGitRepository(path, target.IsDir()) {
+						emit(path)
+					}
+					return nil // never descend into symlinks
+				}
 				if isGitRepository(path, info.IsDir()) {
-					results <- path
+					emit(path)
 					return filepath.SkipDir
 				}
 				return nil

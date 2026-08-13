@@ -36,8 +36,9 @@ commands (`git.go`), and send `GitReport` results to an output channel.
 - `Analyzer` / `Worker` (analyzer.go, worker.go) — concurrent worker pool
 
 **I/O helpers** (io.go): `collectGitRepositories()` walks the directory tree
-(skipping `.git` and not descending into found repos), `execute()` shells out to
-git, `prompt()` reads stdin for interactive review.
+(skipping `.git` and not descending into found repos; symlinks pointing at git
+repos are followed but never descended into, deduplicated by resolved path),
+`execute()` shells out to git, `prompt()` reads stdin for interactive review.
 
 ## Root Directory Resolution
 
